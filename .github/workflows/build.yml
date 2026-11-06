@@ -5,6 +5,14 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Fix pointer types
+        shell: pwsh
+        run: |
+          Get-ChildItem Source -Recurse -Filter *.h | ForEach-Object {
+            $t = Get-Content $_.FullName -Raw
+            $t = $t.Replace('float** d = ', 'float* const* d = ')
+            Set-Content -Path $_.FullName -Value $t -NoNewline
+          }
       - name: Configure
         run: cmake -B build -A x64
       - name: Build
@@ -13,4 +21,3 @@ jobs:
         with:
           name: AmpForge-win64
           path: build/AmpForge_artefacts/Release/
-          
